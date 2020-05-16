@@ -1,0 +1,7 @@
+{
+    "files.eol": "\n",
+    "python.formatting.provider": "black",
+    "python.formatting.blackArgs": [
+        "--line-length=160"
+    ],
+}

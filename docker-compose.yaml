@@ -1,0 +1,50 @@
+version: "3.4"
+
+services:
+  db:
+    image: postgres:12.2-alpine
+    restart: always
+    volumes: # Keep containers immutable and store data on host machine
+      - db_volume:/var/lib/postgresql/data
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    # ports:
+    #   - ${PUBLIC_DB_PORT}:5432
+
+  redis:
+    image: redis:6.0.1-alpine3.11
+
+  api:
+    build: .
+    restart: always
+    command: python manage.py runserver 0.0.0.0:8080
+    # command: gunicorn --workers=3 stocks.wsgi -b 0.0.0.0:8000
+    # ports:
+    #   - 8080:8080
+    volumes:
+      - .:/usr/local/src/project
+    depends_on:
+      - db
+      - redis
+    env_file: .env
+    environment:
+      DB_HOST: db
+      REDIS_HOST: redis
+    stdin_open: true
+    tty: true
+
+  web_server:
+    image: nginx:1.18.0-alpine
+    restart: always
+    ports:
+      - ${PUBLIC_API_PORT}:80
+    depends_on:
+      - api
+    volumes:
+      - ./nginx/server.conf:/etc/nginx/conf.d/default.conf:ro
+
+volumes:
+  db_volume:

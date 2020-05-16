@@ -1,0 +1,6 @@
+channels
+channels_redis
+Django
+# djangorestframework
+# gunicorn
+psycopg2-binary
